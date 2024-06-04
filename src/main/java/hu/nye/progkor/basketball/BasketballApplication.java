@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 /**
  * Entry point of the application,
  * Where the spring get initialized.
- * Another Comment
+ * Another Commentt
  */
 @SpringBootApplication
 public class BasketballApplication {
