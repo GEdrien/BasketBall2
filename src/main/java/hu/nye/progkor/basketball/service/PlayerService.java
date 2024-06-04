@@ -5,7 +5,7 @@ import java.util.List;
 import hu.nye.progkor.basketball.model.Player;
 
 /**
- * Service interface that define tha functions for the specific implementation.
+ * Service interface that define tha functions for the specific implementations.
  */
 public interface PlayerService {
 
