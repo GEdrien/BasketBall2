@@ -1,34 +1,36 @@
-name: CI Build and Deploy
+name: Feature workflow
 
 on:
-  push
+  push:
+    branches:
+      - feature/**
+      - bugfix/**
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v3
-
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
-
-      - name: Extract project version from pom.xml
-        id: get_version
-        run: |
-          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          echo "Project version is ${VERSION}"
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
-
       - name: Build and publish with Maven
         run: |
-          mvn -B versions:set -DnewVersion="${VERSION}" --file pom.xml
+          # Versioning setup
+          version_prefix=`mvn help:evaluate -Dexpression=project.version --quiet -DforceStdout --file pom.xml | awk -F. '{print $1"."$2}'`
+          version="$version_prefix.${{github.run_number}}-$GITHUB_SHA"
+          echo "Setting artifact version to $version"
+          # Push version to env
+          echo "ARTIFACT_VERSION=$version" >> $GITHUB_ENV
+          # Overwrite local artifact version
+          mvn -B version:set -DnewVersion="$version" --file pom.xml
           mvn -B deploy --file pom.xml
-          cp "target/core-${VERSION}.jar" "target/spring-core.jar"
+          cp "target/deploy-${version}.jar" "target/deploy.jar"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
