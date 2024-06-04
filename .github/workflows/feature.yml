@@ -3,6 +3,9 @@ name: CI Build and Deploy
 on:
   push
 
+permissions:
+  packages: write read
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
